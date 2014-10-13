@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<!--<html ng-app="app">-->
+<html>
+<head>
+  <title>ShareJs & Ace & AngularJs</title>
+
+  <link rel="stylesheet" href="css/app.css">
+  <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
+</head>
+<!--<body ng-controller="MainCtrl">-->
+<body>
+  <div id="header">
+    <div id="htext">
+      Editing <b id='docname'>...</b>
+      <a style="padding-left: 50px;" href="/code.html">New</a>
+    </div>
+
+  </div>
+
+  <div id="editor">Loading...</div>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/ace.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/mode-coffee.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/theme-idle_fingers.js"></script>
+
+  <script src="js/lib/bcsocket.js"></script>
+
+  <script src="js/lib/share.uncompressed.js"></script><!-- v0.6.3 -->
+  <script src="app/share-ace.js"></script><!-- v0.6.3 -->
+
+  <!--<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js"></script>-->
+
+  <script>
+    var randomDocName = function(length) {
+      var chars, x;
+      if (length == null) {
+        length = 10;
+      }
+      chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-=";
+      var name = [];
+      for (x = 0; x < length; x++) {
+        name.push(chars[Math.floor(Math.random() * chars.length)]);
+      }
+      return name.join('');
+    };
+
+    window.onload = function() {
+      var editor = ace.edit("editor");
+
+      editor.setReadOnly(true);
+      editor.getSession().setUseSoftTabs(true);
+      editor.getSession().setTabSize(2);
+//      editor.getSession().setMode(new (require("ace/mode/coffee").Mode));
+      editor.setTheme("ace/theme/idle_fingers");
+
+      if (!document.location.hash) {
+        document.location.hash = '#' + randomDocName();
+      }
+      var docName = "code:" + document.location.hash.slice(1);
+      var span = document.getElementById('docname').innerText = docName;
+
+
+      // Call shareJs
+      var options = {
+        origin: "http://localhost:8000/channel"
+      };
+
+      sharejs.open(docName, 'text', options, function(error, doc) {
+        if (error) {
+          console.error(error);
+          return;
+        }
+
+        if (doc.created) {
+          doc.insert(0, "# Coffeescript editor!\n\nexports.foo = ->\n  console.log 'hi!'");
+        }
+
+        doc.attach_ace(editor);
+        editor.setReadOnly(false);
+      });
+    };
+  </script>
+
+  <!-- App -->
+  <!--<script src="app/app.js"></script>-->
+</body>
+</html>
